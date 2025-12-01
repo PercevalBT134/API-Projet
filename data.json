@@ -1,0 +1,28 @@
+{
+  "books": [
+    {
+      "title": "L'Étranger",
+      "description": "Un roman philosophique d'Albert Camus publié en 1942.",
+      "authorId": 101,
+      "categoryId": 1,
+      "publishedDate": "1942-05-19",
+      "available": true
+    },
+    {
+      "title": "Le Petit Prince",
+      "description": "Un conte poétique et philosophique écrit par Antoine de Saint-Exupéry.",
+      "authorId": 102,
+      "categoryId": 2,
+      "publishedDate": "1943-04-06",
+      "available": false
+    },
+    {
+      "title": "1984",
+      "description": "Un roman dystopique de George Orwell.",
+      "authorId": 103,
+      "categoryId": 3,
+      "publishedDate": "1949-06-08",
+      "available": true
+    }
+  ]
+}
