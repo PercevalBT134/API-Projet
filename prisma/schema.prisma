@@ -17,8 +17,8 @@ model Book {
   id            String      @default(uuid()) @id
   title         String
   description   String
-  authorId      String
-  categoryId    String
+  authorId      Int
+  categoryId    Int
   author        Author    @relation(fields: [authorId], references: [id])
   category      Category  @relation(fields: [categoryId], references: [id])
   publishedDate DateTime
@@ -26,7 +26,7 @@ model Book {
 }
 
 model Author {
-  id        String      @default(uuid()) @id
+  id        Int         @id @default(autoincrement())
   name      String
   biography String
   birthdate DateTime
@@ -34,7 +34,14 @@ model Author {
 }
 
 model Category {
-  id    String      @default(uuid()) @id
+  id    Int         @id @default(autoincrement())
   name  String
   books Book[]
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  password String
+  role     String
 }

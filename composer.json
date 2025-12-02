@@ -1,0 +1,13 @@
+{
+    "require": {
+        "lexik/jwt-authentication-bundle": "^2.18",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/console": "^7.4",
+        "symfony/skeleton": "^7.4"
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/flex": true
+        }
+    }
+}

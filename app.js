@@ -1,13 +1,16 @@
-const express = require('express'); 
+import express from "express";
+ 
 const app = express();
 const port = 3000;
 app.use(express.json());
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+import bcrypt from 'bcryptjs';
+import jwt from "jsonwebtoken";
 
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const fs = require('fs');
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+import fs from "fs";
 
 const swaggerOptions = {
   definition: {
@@ -567,6 +570,58 @@ app.delete('/api/v1/categories/:id', async (req, res) => {
     });
 
     res.json({ message: 'Catégorie supprimé avec succès' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/auth/register', async (req, res) => {
+    const { email, passwords } = req.body;
+    const role = 'user';
+    const password = await bcrypt.hash(passwords, 10);
+
+  try {
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        password,
+        role
+      }
+    });
+
+    res.status(201).json(newUser);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+      // Vérifier si l'utilisateur existe
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+      return res.status(400).json({ message: "Utilisateur introuvable" });
+  }
+
+  // Vérifier le mot de passe
+  const isValid = await bcrypt.compare(password, user.password);
+  if (!isValid) {
+      return res.status(400).json({ message: "Mot de passe incorrect" });
+  }
+
+  const accessToken = jwt.sign(
+      { userId: user.id, role: user.role }, 
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "1d" }
+  );
+
+  return res.json({
+      message: "Connexion réussie",
+      accessToken
+  });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
