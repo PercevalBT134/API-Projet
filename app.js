@@ -7,10 +7,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
+import { authenticateToken } from "./middleware/auth.js";
+import { authenticateRefreshToken } from "./middleware/authrefresh.js";
+import { authorizeRole } from "./middleware/roles.js";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
-import fs from "fs";
 
 const swaggerOptions = {
   definition: {
@@ -85,7 +87,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *       404:
  *         description: Livre introuvable
  */
-app.get('/api/v1/books/:id', async (req, res) => {
+app.get('/api/v1/books/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const book = await prisma.book.findUnique({
@@ -112,7 +114,7 @@ app.get('/api/v1/books/:id', async (req, res) => {
  *       200:
  *         description: Liste des livres
  */
-app.get('/api/v1/books', async (req, res) => {
+app.get('/api/v1/books', authenticateToken, async (req, res) => {
   try {
     const books = await prisma.book.findMany();
     res.json(books);
@@ -151,7 +153,7 @@ app.get('/api/v1/books', async (req, res) => {
  *       201:
  *         description: Livre ajouté avec succès
  */
-app.post('/api/v1/books', async (req, res) => {
+app.post('/api/v1/books', authenticateToken, authorizeRole("admin"), async (req, res) => {
     const { title, description, authorId, categoryId, publishedDate, available } = req.body;
 
   try {
@@ -211,7 +213,7 @@ app.post('/api/v1/books', async (req, res) => {
  *       404:
  *         description: Livre introuvable
  */
-app.put('/api/v1/books/:id', async (req, res) => {
+app.put('/api/v1/books/:id', authenticateToken, authorizeRole("admin"), async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -246,7 +248,7 @@ app.put('/api/v1/books/:id', async (req, res) => {
  *       404:
  *         description: Livre introuvable
  */
-app.delete('/api/v1/books/:id', async (req, res) => {
+app.delete('/api/v1/books/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -255,25 +257,6 @@ app.delete('/api/v1/books/:id', async (req, res) => {
     });
 
     res.json({ message: 'Livre supprimé avec succès' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * @swagger
- * /authors:
- *   get:
- *     summary: Récupère tous les auteurs
- *     tags: [Authors]
- *     responses:
- *       200:
- *         description: Liste des auteurs
- */
-app.get('/api/v1/authors', async (req, res) => {
-  try {
-    const authors = await prisma.author.findMany();
-    res.json(authors);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -312,7 +295,7 @@ app.get('/api/v1/authors', async (req, res) => {
  *       404:
  *         description: Auteur introuvable
  */
-app.get('/api/v1/authors/:id', async (req, res) => {
+app.get('/api/v1/authors/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const author = await prisma.author.findUnique({
@@ -339,10 +322,54 @@ app.get('/api/v1/authors/:id', async (req, res) => {
  *       200:
  *         description: Liste des auteurs
  */
-app.get('/api/v1/authors', async (req, res) => {
+app.get('/api/v1/authors', authenticateToken, async (req, res) => {
   try {
     const authors = await prisma.author.findMany();
     res.json(authors);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /authors:
+ *   post:
+ *     summary: Ajoute un nouveau auteur
+ *     tags: [Authors]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 biography:
+ *                   type: string
+ *                 birthdate:
+ *                   type: string
+ *                   format: date
+ *     responses:
+ *       201:
+ *         description: Auteur ajouté avec succès
+ */
+app.post('/api/v1/authors', authenticateToken, authorizeRole("admin"), async (req, res) => {
+    const { name, biography, birthdate } = req.body;
+
+  try {
+    const newAuthor = await prisma.author.create({
+      data: {
+        name,
+        biography,
+        birthdate: new Date(birthdate)
+      }
+    });
+
+    res.status(201).json(newAuthor);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -383,7 +410,7 @@ app.get('/api/v1/authors', async (req, res) => {
  *       404:
  *         description: Auteur introuvable
  */
-app.put('/api/v1/authors/:id', async (req, res) => {
+app.put('/api/v1/authors/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -418,7 +445,7 @@ app.put('/api/v1/authors/:id', async (req, res) => {
  *       404:
  *         description: Auteur introuvable
  */
-app.delete('/api/v1/authors/:id', async (req, res) => {
+app.delete('/api/v1/authors/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -442,7 +469,7 @@ app.delete('/api/v1/authors/:id', async (req, res) => {
  *       200:
  *         description: Liste des catégories
  */
-app.get('/api/v1/categories', async (req, res) => {
+app.get('/api/v1/categories', authenticateToken, async (req, res) => {
   try {
     const categories = await prisma.category.findMany();
     res.json(categories);
@@ -479,7 +506,7 @@ app.get('/api/v1/categories', async (req, res) => {
  *       404:
  *         description: Catégorie introuvable
  */
-app.get('/api/v1/categories/:id', async (req, res) => {
+app.get('/api/v1/categories/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const category = await prisma.category.findUnique({
@@ -491,6 +518,43 @@ app.get('/api/v1/categories/:id', async (req, res) => {
     }
 
     res.json(category);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: Ajoute une nouvelle catégorie
+ *     tags: [Categories]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Catégorie ajouté avec succès
+ */
+app.post('/api/v1/categories', authenticateToken, authorizeRole("admin"), async (req, res) => {
+    const { name } = req.body;
+
+  try {
+    const newCategory = await prisma.category.create({
+      data: {
+        name
+      }
+    });
+
+    res.status(201).json(newCategory);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -526,7 +590,7 @@ app.get('/api/v1/categories/:id', async (req, res) => {
  *       404:
  *         description: Catégorie introuvable
  */
-app.put('/api/v1/categories/:id', async (req, res) => {
+app.put('/api/v1/categories/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -561,7 +625,7 @@ app.put('/api/v1/categories/:id', async (req, res) => {
  *       404:
  *         description: Catégorie introuvable
  */
-app.delete('/api/v1/categories/:id', async (req, res) => {
+app.delete('/api/v1/categories/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -576,9 +640,9 @@ app.delete('/api/v1/categories/:id', async (req, res) => {
 });
 
 app.post('/api/v1/auth/register', async (req, res) => {
-    const { email, passwords } = req.body;
+    let { email, password } = req.body;
     const role = 'user';
-    const password = await bcrypt.hash(passwords, 10);
+    password = await bcrypt.hash(password, 10);
 
   try {
     const newUser = await prisma.user.create({
@@ -617,6 +681,12 @@ app.post('/api/v1/auth/login', async (req, res) => {
       { expiresIn: "1d" }
   );
 
+  const refreshToken = jwt.sign(
+      { userId: user.id, role: user.role }, 
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "30d" }
+  );
+
   return res.json({
       message: "Connexion réussie",
       accessToken
@@ -624,6 +694,22 @@ app.post('/api/v1/auth/login', async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/auth/refresh', authenticateRefreshToken, async (req, res) => {
+  try {
+  // Génère un nouveau access token
+  const newAccessToken = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: "1d" }
+  );
+
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
