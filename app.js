@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "./middleware/auth.js";
 import { authenticateRefreshToken } from "./middleware/authrefresh.js";
-import { authorizeRole } from "./middleware/roles.js";
+import { authorizeRoles } from "./middleware/roles.js";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
