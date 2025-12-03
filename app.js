@@ -153,7 +153,7 @@ app.get('/api/v1/books', authenticateToken, async (req, res) => {
  *       201:
  *         description: Livre ajouté avec succès
  */
-app.post('/api/v1/books', authenticateToken, authorizeRole("admin"), async (req, res) => {
+app.post('/api/v1/books', authenticateToken, authorizeRoles("admin"), async (req, res) => {
     const { title, description, authorId, categoryId, publishedDate, available } = req.body;
 
   try {
@@ -213,7 +213,7 @@ app.post('/api/v1/books', authenticateToken, authorizeRole("admin"), async (req,
  *       404:
  *         description: Livre introuvable
  */
-app.put('/api/v1/books/:id', authenticateToken, authorizeRole("admin"), async (req, res) => {
+app.put('/api/v1/books/:id', authenticateToken, authorizeRoles("admin"), async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -357,7 +357,7 @@ app.get('/api/v1/authors', authenticateToken, async (req, res) => {
  *       201:
  *         description: Auteur ajouté avec succès
  */
-app.post('/api/v1/authors', authenticateToken, authorizeRole("admin"), async (req, res) => {
+app.post('/api/v1/authors', authenticateToken, authorizeRoles("admin"), async (req, res) => {
     const { name, biography, birthdate } = req.body;
 
   try {
@@ -544,7 +544,7 @@ app.get('/api/v1/categories/:id', authenticateToken, async (req, res) => {
  *       201:
  *         description: Catégorie ajouté avec succès
  */
-app.post('/api/v1/categories', authenticateToken, authorizeRole("admin"), async (req, res) => {
+app.post('/api/v1/categories', authenticateToken, authorizeRoles("admin"), async (req, res) => {
     const { name } = req.body;
 
   try {
