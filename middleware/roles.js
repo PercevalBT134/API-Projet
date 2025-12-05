@@ -1,6 +1,5 @@
 export const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
-    const prisma = new PrismaClient();
     if (!req.user) return res.status(401).json({ error: "Non authentifié" });
     const role = req.user.role.trim();
     if (!allowedRoles.map(r => r.toLowerCase()).includes(role.toLowerCase())) {
