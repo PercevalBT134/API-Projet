@@ -24,7 +24,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000/api/v1'
+        url: 'https://api-projet-qd2e.onrender.com//api/v1'
       }
     ]
   },
@@ -153,7 +153,7 @@ app.get('/api/v1/books', authenticateToken, async (req, res) => {
  *       201:
  *         description: Livre ajouté avec succès
  */
-app.post('/api/v1/books', authenticateToken, authorizeRoles("admin"), async (req, res) => {
+app.post('/api/v1/books', authenticateToken, authorizeRoles('admin'), async (req, res) => {
     const { title, description, authorId, categoryId, publishedDate, available } = req.body;
 
   try {
@@ -213,7 +213,7 @@ app.post('/api/v1/books', authenticateToken, authorizeRoles("admin"), async (req
  *       404:
  *         description: Livre introuvable
  */
-app.put('/api/v1/books/:id', authenticateToken, authorizeRoles("admin"), async (req, res) => {
+app.put('/api/v1/books/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -248,7 +248,7 @@ app.put('/api/v1/books/:id', authenticateToken, authorizeRoles("admin"), async (
  *       404:
  *         description: Livre introuvable
  */
-app.delete('/api/v1/books/:id', authenticateToken, async (req, res) => {
+app.delete('/api/v1/books/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -357,7 +357,7 @@ app.get('/api/v1/authors', authenticateToken, async (req, res) => {
  *       201:
  *         description: Auteur ajouté avec succès
  */
-app.post('/api/v1/authors', authenticateToken, authorizeRoles("admin"), async (req, res) => {
+app.post('/api/v1/authors', authenticateToken, authorizeRoles('admin'), async (req, res) => {
     const { name, biography, birthdate } = req.body;
 
   try {
@@ -410,7 +410,7 @@ app.post('/api/v1/authors', authenticateToken, authorizeRoles("admin"), async (r
  *       404:
  *         description: Auteur introuvable
  */
-app.put('/api/v1/authors/:id', authenticateToken, async (req, res) => {
+app.put('/api/v1/authors/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -445,7 +445,7 @@ app.put('/api/v1/authors/:id', authenticateToken, async (req, res) => {
  *       404:
  *         description: Auteur introuvable
  */
-app.delete('/api/v1/authors/:id', authenticateToken, async (req, res) => {
+app.delete('/api/v1/authors/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -544,7 +544,7 @@ app.get('/api/v1/categories/:id', authenticateToken, async (req, res) => {
  *       201:
  *         description: Catégorie ajouté avec succès
  */
-app.post('/api/v1/categories', authenticateToken, authorizeRoles("admin"), async (req, res) => {
+app.post('/api/v1/categories', authenticateToken, authorizeRoles('admin'), async (req, res) => {
     const { name } = req.body;
 
   try {
@@ -590,7 +590,7 @@ app.post('/api/v1/categories', authenticateToken, authorizeRoles("admin"), async
  *       404:
  *         description: Catégorie introuvable
  */
-app.put('/api/v1/categories/:id', authenticateToken, async (req, res) => {
+app.put('/api/v1/categories/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body;
 
@@ -625,7 +625,7 @@ app.put('/api/v1/categories/:id', authenticateToken, async (req, res) => {
  *       404:
  *         description: Catégorie introuvable
  */
-app.delete('/api/v1/categories/:id', authenticateToken, async (req, res) => {
+app.delete('/api/v1/categories/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   const id = parseInt(req.params.id);
 
   try {
